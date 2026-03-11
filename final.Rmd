@@ -1,0 +1,1281 @@
+
+
+Abstract
+Confidence in elections and interpersonal trust are vital to democratic systems. In this project, we combined multiple datasets (nine) from the world bank to explore how parts of trust, GDP, and even temperature can affect people’s trust. First, we examine whether confidence in elections is associated with the Horizontal Accountability Index. Second, we analyze whether GDP per capita is related to confidence in elections across a set of economically dominant countries. Third, we used 2 climate data sets (CDD and heat index 35) to investigate whether long term heat exposure is associated with both interpersonal trust and confidence in elections. Although there is variation in all data results, there are strong correlations.
+
+The following research questions:
+Research Q1: Is there a Correlation Between Percentage of Population with Confidence in Elections and Horizontal Accountability Index?
+Research Q1: Does a country’s GDP influence how much people trust elections?
+Research Q3: How does temperature affect confidence in elections and interpersonal trust? 
+
+Introduction - Question 1
+With a rapidly changing global political climate, we were curious about the factors that could correlate to people’s confidence in elections. Especially with the rise of misinformation, troll farms, and social media exasperating election fears, democratic governments across the globe are riddled with distrust in their elections. We wanted to understand what other factors could impact this phenomenon other than the ones mentioned previously.  ‘Percentage of Population with Confidence in Elections’ (PPCE) is a key indicator in understanding the performance of every facet of public life in democratic governments including judicial accountability, education, press, identity, and freedoms. Nations with higher levels of confidence in elections can indicate transparent, fair, and equal elections. While nations with lower levels of confidence in elections are associated with unstable governments, rigged elections, foreign collision, corruption, misinformation, etc. Was it a true indicator of election integrity, is it correlated to the nation’s GDP, or was it correlated to the Heat Index?
+●	Is Percentage of Population with Confidence in Elections correlated with the Horizontal Accountability Index? 
+●	
+
+Data Sources
+1.	Percentage of Population with Confidence in Elections (PoPwCiE)
+	Source: World Bank Data
+Collected by: Afrobarometer (AF), Asian Barometer (ASB), Latinobarometro (LB), and World Values Survey (WVS).
+Usage Permissions: World Bank’s Open Data
+Description: The dataset contains the percentage of people who were confident that their election results were categorized by urbanization levels, gender, religion, ethnicity, etc. 
+Relevance: It is essential for analyzing how nations believe in their government’s performance of conducting free and fair elections. Categories like urbanization, gender, religion, ethnicity, etc also indicate how these differences lead to varied levels of election trust. 
+2.	Horizontal Accountability Index (HORACC)
+Source: World Bank Data
+Collected by: Varieties of Democracy (V-Dem)
+Usage Permissions: World Bank’s Open Data & V-Dem’s databases have free and open access.
+Description: Horizontal Accountability Index is a score assigned to nations from -2 to 2 .3 based on how well government institutions hold officials and other branches of government accountable for abuses of power. Originally had data from 175 countries from 1759-2024 (25,816 rows & 38 cols). Although the OBS value (Horizontal Accountability Index) was null for all nations until 1900 and all other columns except OBS value, TIME_PERIOD (year), and REF_AREA_NAME (nation name) were dispensable. 
+Relevance: This is essential to assess whether people’s confidence in their elections is connected to governments being held accountable to abuses of power or is due to a different variable.
+Thus, this dataset does have a considerable blindspot of nations of countries with and without healthy democracies. The dataset doesn’t include most European, African or authoritarian countries like North Korea, Egypt, Saudi Arabia, Spain, etc.
+Data
+Trust in Elections Data (PoPwCiE)
+●	Rows: 2,030
+●	Columns: 40
+●	Each row represents: Each row represents the nation’s PoPwCiE in a specified year and specification. With each row including multiple breakdowns in urbanization, religion, ethnicity, etc. 
+●	Relevant variables and how they’re coded: 
+○	 REF_AREA_NAME: Stored as a character. 
+○	TIME_PERIOD: Stored as a dbl (double-precision floating-point number)
+○	OBS_VALUE: the percentage of people with confidence in elections for that specified classification (based on breakdowns).
+●	Missing/Implausible values: There were no null values for the above-mentioned relevant variables. 
+Horizontal Accountability Index Data
+●	Rows: 25,816
+●	Columns: 38
+●	Each row represents: A nation’s HORACC score for each year. 
+●	Relevant variables and how they’re coded: 
+○	REF_AREA_LABEL: Stored as a character. 
+○	TIME_PERIOD: Stored as a dbl (double-precision floating-point number).
+○	OBS_VALUE: the Horizontal Accountability Index score 
+●	Missing/Implausible values: HORACC scores are null from 1789-1899. There were no implausible scores. 
+
+Methods
+Horizontal Accountability Index (HORACC) vs. PoPwCiE
+Firstly, we imported the PoPwCiE CSV dataset. Then, we selected REF_AREA_LABEL, TIME_PERIOD, OBS_VALUE, URBANISATION, AGE, SEX, COMP_BREAKDOWN_2, COMP_BREAKDOWN_1 columns from PoPwCiE. Later, we filtered to only include URBANISATION, AGE, SEX, COMP_BREAKDOWN_2, and COMP_BREAKDOWN_1 values that were describing the total population (ie: sex == “_T” meant the data wasn’t separated by sex). After doing, so we extracted just the necessary columns: REF_AREA_LABEL, TIME_PERIOD, and OBS_VALUE.  
+
+Secondly, we imported the HORACC CSV dataset. Since the dataset only included OBS values for the totality of demographic columns, we did not need to filter them out. For instance, while the HORACC dataset does contain a SEX_ID column- all the values are “_T”. Thus we only extracted the REF_AREA_NAME, TIME_PERIOD, OBS_VALUE columns. As mentioned previously, all OBS_VALUE before 1900 were null. So we then filtered null OBS_VALUES and limited the TIME_PERIOD to be between 2015 and 2022 (to match PoPwCiE). 
+Then, we merged the PoPwCiE columns (REF_AREA_LABEL, TIME_PERIOD) combining with HORACC columns (REF_AREA_NAME, TIME_PERIOD) with an inner-join. An inner join means that only values that are common between both the datasets remain. The column names of the combined dataset were changed to be “Country”, “Year”, “Percentage of People with Confidence in Elections”, and “Horizontal Accountability Index”. 
+In order to plot the values onto a graph using ggplot, we used a factor on the Year column. Next, we created a scatterplot of the combined dataset to have x-values of HORACC and y-values of PoPwCiE with colors being determined by which year the data describes. Since most automatic color palettes had many of the years be unreadable, we picked the color palette with a darker range in scale_color_brewer(palette = "Dark2"). This graph was created to have two different best fit lines. The black line represents the best-fit linear line (geom_smooth(method = “lm”)) and there is a dark green line that represents the best-fit curved line (geom_smooth(method = “loess”)). We created two distinct lines to demonstrate general trends and topical trends. Lastly, we edited the y’s label to include a percentage sign to indicate metrics and added a centered title. 
+
+Results
+ 
+The graph indicates that there is a positive correlation between HORACC and PoPwCiE from 2015-2022. Specifically, countries with high HORACC scores generally have a higher PoPwCiE value. However, nations with moderate HORACC scores (-0.5 to 0.5) tend to have a higher PoPwCiE than nations with medium-high HORACC scores (0.5 to 1.5). Thus, there is a topical trend that indicates that nations with moderate HORACC scores are more likely to have higher PoPwCiE values than nations with medium-high scores. 
+Discussion for Question 1: Is there a Correlation Between Percentage of Population with Confidence in Elections and Horizontal Accountability Index?
+
+HORACC scores in comparison with PoPwCiE levels 
+
+
+
+
+
+
+Research Q2: 
+Does a country’s GDP influence how much people trust elections?
+
+Result / Visualization: 
+
+Scatter Plot:
+The scatter plot shows a clear positive relationship between GDP per capita and election trust over a 10 year average period(1970-2019)
+
+Countries like Canada(CAN) and Germany(DEU) have significant faith in their election processes and do well economically.
+
+The United States(USA), United Kingdom(GBR), Japan(JPN) and South Korea(KOR) all have high GDP but only moderate trust. This shows that just being economically successful doesn’t mean that people will trust elections
+
+Summary: The general trend backs up the assumption that a stronger economy is often linked to more faith in elections. But there are several important exceptions that shows that political transparency, the media environment, the quality of governance, and the history of democracy also have a big impact on how much people trust the Government. GDP is an essential aspect, but it is not the only one that affects election trust.
+
+
+Bar Chart: 
+The bar chart shows the average election trust score for 12 major countries over the past 50 years.
+
+The selected countries that have the most trust in elections are Canada and Germany.
+
+South Korea, Japan and the United Kingdom are in the middle category, exhibiting modest trust even if their economies are strong.
+
+India, Turkey, Brazil and South Africa are lower on the trust scale, which means that people don’t trust the electoral process as much as the other countries.
+
+Summary:
+The bar chart supports the premise that many wealthier countries tend to trust elections more, but economic status alone does not fully explain the disparities. The political stability, social climate, transparency, and historical backdrop of each country also affect how much people trust their electoral systems.
+
+Findings:
+The findings indicate that GDP per capita is an unreliable indicator of electoral trust. Political openness, corruption levels, democratic history, and societal stability probably have a considerably bigger effect on how much people trust elections. Economic growth may help, but robust democratic institutions are needed to build trust.
+
+Limitations
+A small number of countries:
+Only 12 countries were chosen and they were mostly wealthy or politically important ones.
+This makes it harder for the results to show how confident people are in elections around the world.
+Observational data cannot establish causation:
+We can’t say that one directly influences the other, even if GDP and trust seen to be associated with each other.
+
+A lot of political and cultural issues that can’t be measured affect public trust.
+GDP per capita may not accurately  represent socioeconomic inequality:
+The GDP statistic does not show how unequal wealth is or how well democracy works in each country.
+
+Overall, the dataset is good for finding patterns, but not good enough to make strong global claims or figure out cause and effect linkages.
+
+Potential Improvements
+
+Add more data to the dataset:
+1.Add more countries from different areas and with varied income levels.
+2. To illustrate how trust fluctuates over time, use full time-series data instead of long-term averages.
+Add more social and political indicators:
+1.Add things like the corruption index, how open the government is, how free the media is, how fair the elections are, and how unequal things are.
+2.Make models with more than one variable to better understand why trust is different in different countries
+Make Data More Consistent:
+1.Use the same survey year for all countries
+2. To avoid getting old information look at the most recent waves of the world Values Survey.
+
+Improvements to the look:
+1.Put countries into groups based on their politics or economy( for example, democracies vs. rising economies.
+2.Add time trend graphs, including line graphs or animated changes throughout the years.
+
+
+
+
+Research Q3:
+How does temperature affect confidence in elections and interpersonal trust? 
+My section is whether such an unlikely factor like climate can affect this. This was measured through cooling degree days and heat index data. Using the world bank sustainability indicators, climate data, and V-Dem corruption scores, my project contains a combined dataset of over 72 counties over a multitude of years. The association is modest and heavily mediated by other factors. However a general trend I found is that cool and warm countries show a similar trend. Cooler countries have a relatively higher trust, while hot climates show a trust drop. Additional breakdowns were made, for example by urban vs rural area and the country case studies (Brazil, India, China, Nigeria, USA, etc.) highlight that temperature alone can’t explain global trust patterns. Although the other parts of the project do contribute, for example corruption and GDP shows a significant correlation. 
+1.	Interpersonal Trust Dataset
+○	Source: World Bank, Social Sustainability Global Database (indicator WB_SSGD_PCT_POP_TRUST).
+○	Description: Percentage of population who think most people can be trusted, by country and year, with breakdowns by sex, age, urbanisation, religion, and ethnicity.
+○	Usage permissions: Publicly accessible open data for non-commercial use.
+○	Role in project: Main outcome variable (our proxy for social trust / confidence in society).
+2.	Heat Index 35 Dataset
+○	Source: World Bank ESG climate data (WB_ESG_EN_CLC_HEAT_XD).
+○	Description: Number of days per year when the daily heat index exceeds 35°C.
+○	Role in project: Alternative extreme heat indicator; used mainly for descriptive context and robustness checks.
+3.	Cooling Degree Days (CDD) Dataset
+○	Source: World Bank Climate Change Knowledge Portal (WB_CLEAR_EN_CLC_CDDY_XD).
+○	Description: Annual cumulative degrees above 18°C, a standard measure of heat-related energy demand and long-term heat exposure.
+○	Role in project: Our main climate variable, since it is smoother, easier to interpret, and more consistently recorded across countries.
+4.	Public Sector Corruption Dataset
+○	Source: V-Dem Core dataset, World Bank Data360 (VDEM_CORE_V2X_PUBCORR).
+○	Description: Public sector corruption index per country and year, where higher values indicate more corruption.
+○	Role in project: Key governance variable; lets us compare whether corruption or climate is more strongly related to interpersonal trust.
+ Before cleaning, the raw datasets had the following dimensions:
+●	Trust dataset: 1,639 rows × 40 columns
+●	Heat Index dataset: 9,843 rows × 37 columns
+●	Cooling Degree Days dataset: 9,894 rows × 37 columns
+●	Corruption dataset: 25,816 rows × 38 columns
+My Data Cleaning and Processing
+·       Filter to a common recent window (2015–2020).
+·       Restrict trust data to “totals.” only kept rows where:
+o   Sex, age, urbanisation, ethnicity, and religion are set to “Total”.
+·       Compute per-country averages for 2015–2020.
+o   group_by(iso3, country)
+o   summarise(average_value = mean(variable, na.rm = TRUE))
+·       Merge into a single “analysis” dataframe.
+o   combined:
+§  trust_avg
+§  heat_avg
+§  cdd_avg
+§  corr_avg
+
+·       clean_gov = 1 - avg_pubcorr → a “cleaner government” index where higher is better.
+·       Additional breakdowns:
+o   Ubran vs rural where URBANISATION is RUR or URB and repeated the averaging + merge with cdd_avg
+o   trust_age dataset for age categories “15 to 29 years old” and “30 to 59 years old”
+·       technical decisions:
+o   Chose cooling degree days as the primary climate measure because it’s smoother and better suited for cross-country comparisons rather than the extreme count like heat index 35
+·       averages over multiple years because single years had very unstable data.
+heat_band to understand cool/warm/hot countries
+
+A scatter plot comparing Cooling Degree Days (CDD) and average trust (%) shows:
+●	Downward trend; hotter countries (high cdd) tend to report lower trust
+●	Regression line slopes downward (although not very strongly)
+●	Very hot, low trust countries
+●	Cooler, high trust countries
+●	Warm, mid trust countries; although not a very clean alignment (Greece, turkey, Argentina)
+·   	·  Hot countries (avg CDD > 2500)
+ Mean trust ≈ 15.3%
+·   	·  Warm countries (500 < CDD < 2500)
+ Mean trust ≈ 24.2%
+·   	·  Cool countries (CDD < 500)
+ Mean trust ≈ 25.1%
+ 
+moderate evidence that higher temperatures correlate with lower interpersonal trust
+  
+
+Findings:
+Modest negative correlation between heat and trust:
+Countries with more extreme heat exposure tend to reort lower interpersonal trust.
+Corruption tends to correlate stronger with trust rather than temperature:
+Low corruption countries score higher trust regardless of climate.
+  
+Results:
+RQ1: Does temperature (CDD) correlate with interpersonal trust?
+The regression line slopes downwards
+Had results with countries with a very high CDD (Mali, Burkina Faso, Ghana, Nigeria, Cambodia) cluster in the bottom-right: very hot, low trust.
+Countries with very low CDD (Canada, New Zealand, Chile) usually have higher trust.
+Limitations:
+Often 1-2 surveys per country (not continuous)
+There were many small or low survey countries
+Heat index 35 measured extreme events.
+Cdd measured cumulative heat exposure. They didn’t always agree, so I had to refer to one temperature set (cdd) more than the other
+Obviously correlation does not mean causation.
+ Cool climates:
+○	Rural mean trust ≈ 23.7%
+○	Urban mean trust ≈ 25.9%
+●	Warm climates:
+○	Rural mean trust ≈ 23.4%
+○	Urban mean trust ≈ 25.6%
+●	Hot climates:
+○	Rural mean trust ≈ 16.0%
+○	Urban mean trust ≈ 14.0%
+Discussion:
+Climate effect:
+●	Hot countries, especially those with extremely high Cooling Degree Days, tend to have lower trust.
+●	However, warm vs cool climates are not dramatically different, and there is significant overlap.
+Corruption effect:
+●	Cleaner governments (low corruption scores) consistently show higher trust.
+●	When climate and corruption “disagree,” corruption usually wins (e.g., Singapore and China show that strong governance can coexist with high heat).
+Urban/rural nuance:
+●	Hot climates depress trust for both urban and rural areas, but in cooler contexts urban trust is slightly higher.
+●	This suggests climate interacts with social structure rather than working alone
+
+
+
+ Improvements:
+Using multi-year rolling averages would stabilize noisy countries.
+Using more granular climate variables would have seasonal averages, humidity, and heat anomalies.
+Could in the future add KNN to classify trust levels.
+ 
+Dataset dimensions:
+Dataset	Rows	Columns	Notes
+Trust	1,639	40	Only ~72 usable after filtering 2015–2020 totals.
+Heat Index	9,843	37	Annual climate exposure data.
+CDD	9,894	37	Chosen as primary temp variable.
+Corruption	25,816	38	Annual V-Dem corruption scores.
+
+Variables:
+REF_AREA — ISO3 country code
+ REF_AREA_LABEL — country name
+TIME_PERIOD — year
+OBS_VALUE — numeric value for indicator
+SEX, AGE, URBANISATION, COMP_BREAKDOWN_* — filters for “total population”
+Trust variable: percentage of people who think most people can be trusted
+CDD variable: cumulative degrees above 18°C
+Corruption variable: V-Dem public sector corruption index
+
+Summary
+By combining World Bank social trust data, Cooling Degree Days, Heat Index 35, and V-Dem corruption indices for 2015–2020, the project has a 72-country dataset that allowed our team to compare patterns at a global level.
+To summarise:
+Very hot climates are associated with lower average interpersonal trust, on the order of ~15% vs ~24–25% in cooler or warm climates.
+Public sector corruption shows an even clearer association: clean governments tend to have high trust, while highly corrupt ones almost always suffer from low trust.
+Urban vs rural trust patterns differ depending on climate, hinting that environmental and social structures interact. (not as mentioned during presentation)
+Individual country case studies (Brazil, India, China, Nigeria, United States, Greece) represent that climate provides context, however there is so much more nuance here. 
+
+
+
+
+
+Summary and conclusion
+
+Countries with higher Horizontal Accountability scores generally report greater confidence in elections, while GDP shows only a weak and inconsistent relationship. Apparently, wealth alone doesn’t guarantee trust in democratic processes.  Climate has a modest association: very hot countries tend to exhibit lower interpersonal trust.
+
+
+Overall, strong accountability systems and low corruption appear far more important than economic status or climate
+
+
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tidyverse)
+library(ggplot2)
+pctConf <- read_delim("WB_Pct_of_Conf_Elections.csv")
+pctConf
+pctConf <- pctConf %>%
+  select(c(REF_AREA_LABEL, TIME_PERIOD, OBS_VALUE, URBANISATION, AGE, SEX, COMP_BREAKDOWN_2, COMP_BREAKDOWN_1)) %>%
+  filter(URBANISATION == "_T" & AGE == "_T" & SEX == "_T" & COMP_BREAKDOWN_2 == "_T" & COMP_BREAKDOWN_1 == "_T")
+pctConf
+range(pctConf$TIME_PERIOD)
+pctConf <- pctConf %>%
+  select(c(REF_AREA_LABEL, TIME_PERIOD, OBS_VALUE))
+dim(pctConf)
+sample_n(pctConf, 3)
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+horacc <- read_delim("VDEM_CORE_V2X_HORACC.csv")
+dim(horacc)
+horacc
+horacc <- horacc%>%
+  select(c(REF_AREA_NAME, TIME_PERIOD, OBS_VALUE)) %>%
+  filter(!is.na(OBS_VALUE) & TIME_PERIOD >= 2015 & TIME_PERIOD <= 2022)
+horacc
+fin <- merge(pctConf, horacc, by.x = c("REF_AREA_LABEL", "TIME_PERIOD"), by.y = c("REF_AREA_NAME", "TIME_PERIOD"), all.x = TRUE)
+fin <- fin %>%
+  mutate("Percentage of Confidence in elections" = OBS_VALUE.x, "HOR" = OBS_VALUE.y) %>%
+  select(!c(OBS_VALUE.x, OBS_VALUE.y)) %>%
+  filter(!is.na(HOR))
+
+fin$TIME_PERIOD <- factor(fin$TIME_PERIOD)
+fin %>%
+  ggplot(aes(HOR,`Percentage of Confidence in elections`, col = TIME_PERIOD)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2") +
+  geom_smooth(method = "loess", se = FALSE, aes(color = NULL), formula = y ~ x, color = "darkgreen") +
+  geom_smooth(method = "lm", se = FALSE, aes(color = NULL), formula = y ~ x, color = "black") +
+
+  ggtitle(str_wrap("Horizontal Accountability Index vs Percentage of People with Confidence in elections from 2015-2022", 75))+
+  theme(plot.title = element_text(hjust=0.5))+
+  labs(x = "Horizontal Accountability Index", y = "Percentage of People with Confidence in Elections (%)", col = "Year")
+
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,       
+  warning = FALSE,   
+  message = FALSE,     
+  results = 'hide',    
+  paged.print = FALSE 
+)
+
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+# ---------------- Load Data ----------------
+WVS <- read_csv("WSV.csv")
+Wbank <- read_csv("WorldBank_GDP.csv", skip = 4)
+
+selected_countries <- c("USA","CAN","GBR","DEU","FRA",
+                        "JPN","KOR","IND",
+                        "BRA","ARG","TUR","ZAF")
+
+# ---------------- Clean Election Trust ----------------
+trust <- WVS %>%
+  select(
+    country = B_COUNTRY_ALPHA,
+    year = A_YEAR,
+    elect_trust = electintegr
+  ) %>%
+  filter(!is.na(elect_trust))
+
+# ---------------- Set Time Range ----------------
+start_year <- 2013
+end_year <- 2023
+
+# Election Trust 50-year average
+trust_10yr <- trust %>%
+  filter(country %in% selected_countries) %>%
+  filter(year >= start_year) %>%
+  group_by(country) %>%
+  summarise(elect_trust = mean(elect_trust, na.rm = TRUE))
+
+# ---------------- GDP 50-year average ----------------
+gdp_10yr <- Wbank %>%
+  filter(`Country Code` %in% selected_countries) %>%
+  select(country = `Country Code`, as.character(start_year:end_year)) %>%
+  pivot_longer(cols = -country, 
+               names_to = "year", 
+               values_to = "gdp") %>%
+  group_by(country) %>%
+  summarise(gdp = mean(gdp, na.rm = TRUE))
+
+# ---------------- Merge Data ----------------
+merged_10yr <- trust_10yr %>%
+  left_join(gdp_10yr, by = "country") %>%
+  filter(!is.na(gdp))
+
+merged_10yr
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+merged_long <- merged_10yr %>%
+  pivot_longer(cols = c(elect_trust, gdp),
+               names_to = "metric",
+               values_to = "value") %>%
+  mutate(metric = recode(metric,
+                         "elect_trust" = "Election Trust Score (1 = Low, 4 = High)",
+                         "gdp" = "GDP per Capita (USD)"))
+
+ggplot(merged_long, aes(x = reorder(country, value), y = value, fill = metric)) +
+  geom_col() +
+  facet_wrap(~ metric, scales = "free_y") +
+  labs(
+    title = "Election Trust & GDP per Capita by Country (From 2013-2022)",
+    x = "Country",
+    y = "Value"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(merged_10yr, aes(x = gdp, y = elect_trust, label = country)) +
+  geom_point(size = 3, color = "#0072B2") +
+  geom_text(vjust = -1, size = 3) +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +
+  labs(
+    title = "GDP per Capita vs Election Trust (10-Year Average)",
+    x = "GDP per Capita (USD)",
+    y = "Election Trust Score (1 = Low, 4 = High)"
+  ) +
+  theme_minimal()
+```
+
+
+
+
+```{r}
+
+library(tidyverse)
+library(lubridate)
+```
+
+### 1
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#heat_raw  <- read_delim("WB_ESG_EN_CLC_HEAT_XD.csv" , delim = "\t")
+#cdd_raw   <- read_delim("WB_CLEAR_EN_CLC_CDDY_XD.csv" , delim = "\t")
+#trust_raw <- read_delim("WB_SSGD_PCT_POP_TRUST.csv" , delim = "\t")
+#corr_raw  <- read_delim("VDEM_CORE_V2X_PUBCORR.csv" , delim = "\t")
+
+
+trust_raw <- read_csv("WB_SSGD_PCT_POP_TRUST.csv")
+heat_raw  <- read_csv("WB_ESG_EN_CLC_HEAT_XD.csv")
+cdd_raw   <- read_csv("WB_CLEAR_EN_CLC_CDDY_XD.csv")
+corr_raw  <- read_csv("VDEM_CORE_V2X_PUBCORR.csv")
+
+#head(trust_raw)
+#head(heat_raw)
+#head(cdd_raw)
+#head(corr_raw)
+
+names(trust_raw)
+#dim(trust_raw)
+#str(trust_raw)
+
+
+
+```
+
+
+
+
+### 2
+Cleaned trust dataset 
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trust_clean <- trust_raw %>%
+  # recent years only
+  filter(
+    TIME_PERIOD >= 2015,
+    TIME_PERIOD <= 2020,
+    # total over sex, age, urbanization, ethnicity, religion
+    SEX == "_T", 
+    AGE == "_T", 
+    URBANISATION == "_T",
+    COMP_BREAKDOWN_1 == "_T", #ethnicity
+    COMP_BREAKDOWN_2 == "_T" # religion
+  ) %>%
+
+  select(
+    iso3      = REF_AREA,
+    country   = REF_AREA_LABEL,
+    year      = TIME_PERIOD,
+    trust_pct = OBS_VALUE
+  )
+
+
+```
+
+### 3
+Temperature section
+cleaned the climate datasets (heat index and cdd)
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#heat index 35; the number of the very hot days per year 
+heat_clean <- heat_raw %>%
+  filter(TIME_PERIOD >= 2015, TIME_PERIOD <= 2020) %>%
+  select(
+    iso3       = REF_AREA,
+    country    = REF_AREA_LABEL,
+    year       = TIME_PERIOD,
+    heat_index = OBS_VALUE
+  )
+
+# Cooling Degree Days 
+cdd_clean <- cdd_raw %>%
+  filter(TIME_PERIOD >= 2015, TIME_PERIOD <= 2020) %>%
+  select(
+    iso3    = REF_AREA,
+    country = REF_AREA_LABEL,
+    year    = TIME_PERIOD,
+    cdd     = OBS_VALUE
+  )
+
+```
+
+
+### 4
+cleaning corruption dataset:
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+corr_clean <- corr_raw %>%
+  filter(TIME_PERIOD >= 2015, TIME_PERIOD <= 2020) %>%
+  select(
+    iso3     = REF_AREA_ID,
+    country  = REF_AREA_NAME,
+    year     = TIME_PERIOD,
+    pubcorr  = OBS_VALUE
+  )
+
+```
+
+### 4.5
+computing per country averages (2015-2020)
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#average trust
+trust_avg <- trust_clean %>%
+  group_by(iso3, country) %>%
+  summarise(
+    avg_trust_pct = mean(trust_pct, na.rm = TRUE),
+    .groups = "drop"
+  )
+#heat temp
+heat_avg <- heat_clean %>%
+  group_by(iso3, country) %>%
+  summarise(
+    avg_heat_index = mean(heat_index, na.rm = TRUE),
+    .groups = "drop"
+  )
+#cold temp
+cdd_avg <- cdd_clean %>%
+  group_by(iso3, country) %>%
+  summarise(
+    avg_cdd = mean(cdd, na.rm = TRUE),
+    .groups = "drop"
+  )
+# average corruption
+corr_avg <- corr_clean %>%
+  group_by(iso3, country) %>%
+  summarise(
+    avg_pubcorr = mean(pubcorr, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+```
+
+
+### 6
+merged everything, created new variables and a new nice chart
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df <- trust_avg %>%
+  inner_join(heat_avg %>% select(iso3, avg_heat_index),
+             by = "iso3") %>%
+  inner_join(cdd_avg %>% select(iso3, avg_cdd),
+             by = "iso3") %>%
+  inner_join(corr_avg %>% select(iso3, avg_pubcorr),
+             by = "iso3") %>%
+  mutate(
+    # new numeric variable: 'cleaner government' (higher = less corrupt)
+    clean_gov = 1 - avg_pubcorr,
+    # new categorical variable: climate band based on CDD
+    heat_band = case_when(
+      avg_cdd < 500   ~ "Cool",
+      avg_cdd < 2500  ~ "Warm",
+      TRUE            ~ "Hot"
+    )
+  )
+
+nrow(analysis_df)
+length(unique(analysis_df$iso3))
+
+
+```
+This covers 72 countries. 
+
+
+### 7
+base
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  select(avg_trust_pct, avg_heat_index, avg_cdd, avg_pubcorr) %>%
+  mutate(cdd_band = ifelse(avg_cdd < 2500, "Cool", "Hot")) %>%
+  group_by(cdd_band) %>%
+  summarise(mean_trust = mean(avg_trust_pct))
+
+
+```
+
+### 8
+view graph 
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#View(analysis_df) view is a pretty nice function here- but apperantly it breaks knitting. 
+head(analysis_df)
+```
+
+
+### 9
+graph
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(analysis_df,
+       aes(x = avg_cdd, y = avg_trust_pct)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cooling Degree Days and Interpersonal Trust",
+    x = "Average Cooling Degree Days (2015–2020)",
+    y = "Average % who think most people can be trusted"
+  ) +
+  theme_minimal()
+
+```
+
+### 10
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  group_by(heat_band) %>%
+  summarise(
+    n_countries = n(),
+    mean_trust  = mean(avg_trust_pct, na.rm = TRUE)
+  )
+
+```
+
+
+
+
+
+
+additional gathering- section 10s
+
+### 11
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+# See what values exist for urbanisation
+unique(trust_raw$URBANISATION_LABEL)
+
+# Keep 2015–2020, totals for everything except urbanisation,
+# and only Rural / Urban (not Total)
+trust_urb_rur <- trust_raw %>%
+  filter(
+    TIME_PERIOD >= 2015,
+    TIME_PERIOD <= 2020,
+    SEX == "_T",
+    AGE == "_T",
+    COMP_BREAKDOWN_1 == "_T",   # total ethnicity
+    COMP_BREAKDOWN_2 == "_T",   # total religion
+    URBANISATION %in% c("RUR", "URB")
+  ) %>%
+  select(
+    iso3        = REF_AREA,
+    country     = REF_AREA_LABEL,
+    year        = TIME_PERIOD,
+    urban_label = URBANISATION_LABEL,  # "Rural area" / "Urban area"
+    trust_pct   = OBS_VALUE
+  )
+
+
+```
+
+
+### 12
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trust_urb_rur_avg <- trust_urb_rur %>%
+  group_by(iso3, country, urban_label) %>%
+  summarise(
+    avg_trust_pct = mean(trust_pct, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+```
+
+### 13
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trust_urb_rur_climate <- trust_urb_rur_avg %>%
+  inner_join(cdd_avg %>% select(iso3, avg_cdd),
+             by = "iso3") %>%
+  mutate(
+    heat_band = ifelse(
+      avg_cdd < 500, "Cool",
+      ifelse(avg_cdd < 2500, "Warm", "Hot")
+    )
+  )
+
+```
+
+
+### 14
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+urb_rur_band <- trust_urb_rur_climate %>%
+  group_by(heat_band, urban_label) %>%
+  summarise(
+    mean_trust = mean(avg_trust_pct, na.rm = TRUE),
+    n_countries = n(),
+    .groups = "drop"
+  )
+
+urb_rur_band
+
+```
+
+### 15
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(urb_rur_band,
+       aes(x = heat_band, y = mean_trust, fill = urban_label)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average trust by climate band and area type",
+    x = "Climate band (Cooling Degree Days)",
+    y = "Average % who think most people can be trusted",
+    fill = "Area type"
+  ) +
+  theme_minimal()
+
+```
+
+### 16
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+unique(trust_raw$AGE_LABEL)
+
+```
+
+### 17
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trust_age <- trust_raw %>%
+  filter(
+    TIME_PERIOD >= 2015,
+    TIME_PERIOD <= 2020,
+    SEX == "_T",
+    URBANISATION == "_T",         # total urban/rural
+    COMP_BREAKDOWN_1 == "_T",
+    COMP_BREAKDOWN_2 == "_T",
+    AGE_LABEL %in% c("15 to 29 years old", "30 to 59 years old")
+  ) %>%
+  select(
+    iso3      = REF_AREA,
+    country   = REF_AREA_LABEL,
+    year      = TIME_PERIOD,
+    age_group = AGE_LABEL,
+    trust_pct = OBS_VALUE
+  )
+
+```
+
+
+
+
+
+# additional section on cleaned data of top 10 countries, lowest vs highest trust/corroptuon, countries per heat band, mid-trust, etc
+
+
+### 18 
+hottest and coolest countries
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  arrange(desc(avg_cdd)) %>%
+  head(10)
+
+analysis_df %>%
+  arrange(avg_cdd) %>%
+  head(10)
+```
+
+### 19
+Highest vs lowest trust
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  arrange(desc(avg_trust_pct)) %>%
+  head(10)
+
+analysis_df %>%
+  arrange(avg_trust_pct) %>%
+  head(10)
+
+
+```
+
+### 20
+Highest vs lowest corruption
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  arrange(desc(avg_pubcorr)) %>%
+  head(10)
+
+analysis_df %>%
+  arrange(avg_pubcorr) %>%
+  head(10)
+
+
+```
+
+### 21
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  group_by(heat_band) %>%
+  summarise(examples = paste(head(country, 5), collapse = ", "))
+
+```
+
+
+### 22
+mid trust / mid heat
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  filter(avg_cdd > 500 & avg_cdd < 2500) %>%
+  arrange(avg_trust_pct) %>%
+  head(10)
+
+```
+
+
+
+
+
+
+
+# final section, comparing specific countries as examples
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+# List of desired featured countries
+desired_countries <- c(
+  "Finland", "Norway", "Switzerland",   # cool/high trust
+  "India", "Nigeria", "Indonesia",      # hot/low trust
+  "United States",             # global players
+  "Brazil",                             # medium country
+  "Turkey",                             # medium country
+  "Greece"                              # medium or “messy pattern” country
+)
+
+# Which desired countries are actually in our dataset?
+existing_countries <- analysis_df %>%
+  filter(country %in% desired_countries) %>%
+  pull(country)
+
+missing_countries <- setdiff(desired_countries, existing_countries)
+
+existing_countries
+missing_countries
+
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+featured_df <- analysis_df %>%
+  filter(country %in% existing_countries) %>%
+  select(
+    country,
+    avg_trust_pct,
+    avg_cdd,
+    avg_heat_index,
+    avg_pubcorr,
+    clean_gov,
+    heat_band
+  )
+
+featured_df
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+medium_country <- analysis_df %>%
+  filter(avg_cdd > 500 & avg_cdd < 2500) %>%
+  filter(avg_trust_pct > 20 & avg_trust_pct < 45) %>%
+  arrange(abs(avg_trust_pct - mean(avg_trust_pct, na.rm = TRUE))) %>%
+  slice(1) %>%
+  pull(country)
+
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+control_country <- analysis_df %>%
+  filter(
+    (avg_pubcorr > 0.5 & avg_trust_pct > 40) |  # weird combo
+    (avg_pubcorr < 0.2 & avg_trust_pct < 20)
+  ) %>%
+  slice(1) %>%
+  pull(country)
+
+
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+featured_df <- featured_df %>%
+  bind_rows(
+    analysis_df %>% filter(country == medium_country),
+    analysis_df %>% filter(country == control_country)
+  )
+
+```
+
+#more graphs sections
+
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+ggplot(analysis_df,
+       aes(x = clean_gov, y = avg_trust_pct)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cleaner Governmrerent and Interpersonal Trust",
+    x = "Clean government index (1 - avg_pubcorr)",
+    y = "Average % who think most people can be trusted"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+corr_by_band <- analysis_df %>%
+  group_by(heat_band) %>%
+  summarise(
+    mean_pubcorr = mean(avg_pubcorr, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+corr_by_band
+
+# Bat chart
+ggplot(corr_by_band,
+       aes(x = heat_band, y = mean_pubcorr, fill = heat_band)) +
+  geom_col() +
+  labs(
+    title = "Average public sector corruption by climate band",
+    x = "Climate band (Cooling Degree Days)",
+    y = "Average corruption index (higher = more corrupt)"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+desired_countries <- c(
+  "Finland", "Norway", "Switzerland",   # might not exist in data
+  "India", "Nigeria", "Indonesia",      # hot/low-mid trust
+  "United States",             # big players
+  "Brazil", "Turkey", "Greece"          # tricky patterns
+)
+
+existing_countries <- analysis_df %>%
+  filter(country %in% desired_countries) %>%
+  pull(country)
+
+featured_df <- analysis_df %>%
+  filter(country %in% existing_countries) %>%
+  select(
+    country,
+    avg_trust_pct,
+    avg_cdd,
+    avg_heat_index,
+    avg_pubcorr,
+    clean_gov,
+    heat_band
+  )
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(featured_df,
+       aes(x = country, y = avg_trust_pct, fill = heat_band)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Interpersonal trust in selected countries",
+    x = "Country",
+    y = "Average % who think most people can be trusted",
+    fill = "Climate band"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+analysis_df %>%
+  group_by(heat_band) %>%
+  summarise(
+    n_countries = n(),
+    mean_trust  = mean(avg_trust_pct, na.rm = TRUE)
+  )
+
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trust_by_band <- analysis_df %>%
+  group_by(heat_band) %>%
+  summarise(
+    mean_trust = mean(avg_trust_pct, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+ggplot(trust_by_band,
+       aes(x = heat_band, y = mean_trust, fill = heat_band)) +
+  geom_col() +
+  labs(
+    title = "Average interpersonal trust by climate band",
+    x = "Climate band (Cooling Degree Days)",
+    y = "Average % who think most people can be trusted",
+    fill = "Climate band"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+
+
+
+# new secttion where this was a little last minute and essentially exacty copy pastes of previous sections to slightly change colors and datasets for finalized presentation due to group review
+
+```{r message=TRUE, warning=TRUE, paged.print=TRUE}
+
+
+############################################################
+
+conf_raw <- read_csv("WB_SSGD_PCT_POP_CONF_ELECTIONS.csv")
+
+conf_clean <- conf_raw %>%
+  filter(
+    TIME_PERIOD >= 2015,
+    TIME_PERIOD <= 2020,
+    SEX == "_T",
+    AGE == "_T",
+    URBANISATION == "_T",
+    COMP_BREAKDOWN_1 == "_T",
+    COMP_BREAKDOWN_2 == "_T"
+  ) %>%
+  select(
+    iso3      = REF_AREA,
+    country   = REF_AREA_LABEL,
+    year      = TIME_PERIOD,
+    conf_pct  = OBS_VALUE
+  )
+
+conf_avg <- conf_clean %>%
+  group_by(iso3, country) %>%
+  summarise(
+    avg_conf_pct = mean(conf_pct, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+analysis_df_elec <- analysis_df %>%
+  left_join(conf_avg, by = c("iso3", "country"))
+
+climate_colors <- c(
+  "Cool" = "#1f77b4",   # blue
+  "Warm" = "#ffdd57",   # yellow
+  "Hot"  = "#d62728"    # red
+)
+
+########################################################
+
+conf_by_band <- analysis_df_elec %>%
+  group_by(heat_band) %>%
+  summarise(
+    mean_conf = mean(avg_conf_pct, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+################################
+
+ggplot(conf_by_band,
+       aes(x = heat_band, y = mean_conf, fill = heat_band)) +
+  geom_col() +
+  scale_fill_manual(values = climate_colors) +
+  labs(
+    title = "Confidence in Elections by Climate Band",
+    x = "Climate band (Cooling Degree Days)",
+    y = "Average % who have confidence in elections",
+    fill = "Climate band"
+  ) +
+  theme_minimal()
+
+
+ggplot(analysis_df_elec,
+       aes(x = avg_cdd, y = avg_conf_pct, color = heat_band)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  scale_color_manual(values = climate_colors) +
+  labs(
+    title = "Cooling Degree Days and Confidence in Elections",
+    x = "Average Cooling Degree Days (2015–2020)",
+    y = "Average % confident in elections",
+    color = "Climate band"
+  ) +
+  theme_minimal()
+
+
+ggplot(analysis_df_elec,
+       aes(x = clean_gov, y = avg_conf_pct, color = heat_band)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  scale_color_manual(values = climate_colors) +
+  labs(
+    title = "Cleaner Government and Confidence in Elections",
+    x = "Clean government index (1 - corruption)",
+    y = "Average % confident in elections",
+    color = "Climate band"
+  ) +
+  theme_minimal()
+
+
+featured_elec <- analysis_df_elec %>%
+  filter(country %in% existing_countries) %>%
+  select(country, avg_conf_pct, heat_band)
+
+ggplot(featured_elec,
+       aes(x = reorder(country, avg_conf_pct),
+           y = avg_conf_pct,
+           fill = heat_band)) +
+  geom_col() +
+  scale_fill_manual(values = climate_colors) +
+  coord_flip() +
+  labs(
+    title = "Confidence in Elections in Selected Countries",
+    x = "Country",
+    y = "% confident in elections",
+    fill = "Climaste band"
+  ) +
+  theme_minimal()
+
+
+conf_urb_rur <- conf_raw %>%
+  filter(
+    TIME_PERIOD >= 2015,
+    TIME_PERIOD <= 2020,
+    SEX == "_T",
+    AGE == "_T",
+    COMP_BREAKDOWN_1 == "_T",
+    COMP_BREAKDOWN_2 == "_T",
+    URBANISATION %in% c("RUR", "URB")
+  ) %>%
+  select(
+    iso3 = REF_AREA,
+    country = REF_AREA_LABEL,
+    year = TIME_PERIOD,
+    urban_label = URBANISATION_LABEL,
+    conf_pct = OBS_VALUE
+  )
+
+conf_urb_rur_avg <- conf_urb_rur %>%
+  group_by(iso3, country, urban_label) %>%
+  summarise(avg_conf_pct = mean(conf_pct, na.rm = TRUE), .groups = "drop")
+
+conf_urb_rur_climate <- conf_urb_rur_avg %>%
+  inner_join(cdd_avg %>% select(iso3, avg_cdd), by = "iso3") %>%
+  mutate(
+    heat_band = case_when(
+      avg_cdd < 500 ~ "Cool",
+      avg_cdd < 2500 ~ "Warm",
+      TRUE ~ "Hot"
+    )
+  )
+
+urban_elec_summary <- conf_urb_rur_climate %>%
+  group_by(heat_band, urban_label) %>%
+  summarise(
+    mean_conf = mean(avg_conf_pct, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+ggplot(urban_elec_summary,
+       aes(x = heat_band, y = mean_conf, fill = heat_band)) +
+  geom_col() +
+  scale_fill_manual(values = climate_colors) +
+  facet_wrap(~ urban_label) +
+  labs(
+    title = "Confidence in Elections: Urban vs Rural",
+    x = "Climate band",
+    y = "Average % confident in elections",
+    fill = "Climate bavnd"
+  ) +
+  theme_minimal()
+
+
+
+
+```
+
+
+
+
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+featured_country_list <- c(
+  # Cool
+  "Finland", "Norway", "Switzerland", "New Zealand", "Lesotho",
+  # Warm / Mid
+  "United States", "Greece", "Uruguay",
+  # Hot
+  "India", "Indonesia", "Brazil", "Nigeria"
+)
+
+featured_elec <- analysis_df_elec %>%
+  filter(country %in% featured_country_list) %>%
+  select(country, avg_conf_pct, heat_band)
+
+ggplot(featured_elec,
+       aes(x = reorder(country, avg_conf_pct),
+           y = avg_conf_pct,
+           fill = heat_band)) +
+  geom_col() +
+  scale_fill_manual(values = climate_colors) +
+  coord_flip() +
+  labs(
+    title = "Confidence in Elections in Selected Countries",
+    x = "Country",
+    y = "% confident in elections",
+    fill = "Climate band"
+  ) +
+  theme_minimal()
+
+```
